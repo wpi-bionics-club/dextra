@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Adafruit_PWMServoDriver.h>
+#include <Adafruit_BusIO_Register.h>
 long previousTime;
 
 // put function declarations here:
@@ -19,15 +20,8 @@ void loop() {
   int startingAngle = 0;
   int finalAngle = 180;
   // put your main code here, to run repeatedly:
-  Serial.println("hello");
 
-  while(1){
-    if(((millis() - previousTime) >= timePerClock) ? previousTime = millis() : 0 ){
-      linearControl(angleResolution, startingAngle, finalAngle, timePerClock);
-      Serial.print("This is printing every second ");
-      Serial.println(previousTime);
-    }
-  }
+  linearControl(angleResolution, startingAngle, finalAngle, timePerClock);
 }
 
 // put function definitions here:
@@ -36,14 +30,18 @@ int myFunction(int x, int y) {
   return x + y;
 }
 
-
 // a = delta theta / time in seconds
 void linearControl(int angleIncrimint, int startingAngle, int finalAngle, int timeIncrimint){
   int goalTheta = startingAngle;
 
-  while (startingAngle < finalAngle){
-    goalTheta += angleIncrimint;
-    // write(0, goalTheta);
-  }
+   while(1){
+    if(((millis() - previousTime) >= timeIncrimint) ? previousTime = millis() : 0 ){
+      while (startingAngle < finalAngle){
+        goalTheta += angleIncrimint;
+        // write(0, goalTheta);
 
+        
+      }
+    }
+  }
 }
