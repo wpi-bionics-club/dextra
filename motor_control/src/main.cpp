@@ -1,8 +1,9 @@
 #include <Arduino.h>
+#include <Adafruit_PWMServoDriver.h>
 long previousTime;
 
 // put function declarations here:
-void linearControl(int startingAngle, int time);
+void linearControl(int angleResolution,int startingAngle,int finalAngle,int timePerClock);
 int myFunction(int, int);
 
 void setup() {
@@ -42,7 +43,7 @@ void linearControl(int angleIncrimint, int startingAngle, int finalAngle, int ti
 
   while (startingAngle < finalAngle){
     goalTheta += angleIncrimint;
-    write(0, goalTheta);
+    // write(0, goalTheta);
   }
 
 }
