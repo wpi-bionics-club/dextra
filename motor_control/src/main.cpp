@@ -75,14 +75,15 @@ void setup() {
   previousTime = millis();
 }
 
-void loop() {
-  int timePerClock = 1000;
-  int angleResolution = 10;
-  int startingAngle = 0;
-  int finalAngle = 180;
-  // put your main code here, to run repeatedly:
+#define TIMEPERCLOCK 1000
+#define ANGLERESOLUTION 10
+#define STARTINGANGLE 0
+#define FINALANGLE 180
 
-  linearControl(angleResolution, startingAngle, finalAngle, timePerClock);
+void loop() {
+
+  
+  linearControl(ANGLERESOLUTION, STARTINGANGLE, FINALANGLE, TIMEPERCLOCK);
 }
 
 // a = delta theta / time in seconds
