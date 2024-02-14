@@ -72,36 +72,61 @@ void setup() {
 
   delay(10);
   Serial.begin(9600);
-  previousTime = millis();
+
 }
 
-#define TIMEPERCLOCK 1000
+#define TIMEPERCLOCK 500
 #define ANGLERESOLUTION 10
 #define STARTINGANGLE 0
 #define FINALANGLE 180
 
-void loop() {
-
-  
+void loop() {  
   linearControl(ANGLERESOLUTION, STARTINGANGLE, FINALANGLE, TIMEPERCLOCK);
+  // write(0,0);
+  // delay(1000);
+  // write(0,180);
+ 
 }
 
 // a = delta theta / time in seconds
 void linearControl(int angleIncrimint, int startingAngle, int finalAngle, int timeIncrimint){
-  int goalTheta = startingAngle;
 
-   while(1){
-    if(((millis() - previousTime) >= timeIncrimint) ? previousTime = millis() : 0 ){
-      while (startingAngle < finalAngle){
-        goalTheta += angleIncrimint;
-        write(0, goalTheta);        
-      }
-    }
+  int goalTheta = startingAngle;
+  previousTime = millis();
+
+   while(goalTheta <= finalAngle){
+    if((((millis() - previousTime) >= timeIncrimint) ? previousTime = millis() : 0) ){ // if dt is correct
+      write(0, goalTheta);   
+      Serial.println(goalTheta);     
+      goalTheta += angleIncrimint;
+    } 
+    
   }
+
+  // delay(1000);
+}
+
+void linearControl(int angleIncrimint, int startingAngle, int finalAngle, int timeIncrimint){
+
+  int goalTheta = startingAngle;
+  previousTime = millis();
+
+   while(goalTheta <= finalAngle){
+    if((((millis() - previousTime) >= timeIncrimint) ? previousTime = millis() : 0) ){ // if dt is correct
+      write(0, goalTheta);   
+      Serial.println(goalTheta);     
+      goalTheta += angleIncrimint;
+    } 
+    
+  }
+
+  // delay(1000);
 }
 
 void write(int servo_num, int angle) {
+  
   int pulse = map(angle, 0, 180, SERVOMIN, SERVOMAX);
+  // Serial.println(pulse);
   pwm.setPWM(servo_num, 0, pulse);
 }
 
