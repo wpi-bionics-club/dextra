@@ -3,31 +3,9 @@
 #include <Adafruit_BusIO_Register.h>
 #include <Wire.h>
 
-/*************************************************** 
-  This is an example for our Adafruit 16-channel PWM & Servo driver
-  Servo test - this will drive 8 servos, one after the other on the
-  first 8 pins of the PCA9685
-
-  Pick one up today in the adafruit shop!
-  ------> http://www.adafruit.com/products/815
-  
-  These drivers use I2C to communicate, 2 pins are required to  
-  interface.
-
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada for Adafruit Industries.  
-  BSD license, all text above must be included in any redistribution
- ****************************************************/
 
 // called this way, it uses the default address 0x40
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-// you can also call it with a different address you want
-//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);
-// you can also call it with a different address and I2C interface
-//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40, Wire);
 
 // Depending on your servo make, the pulse width min and max may vary, you 
 // want these to be as small/large as possible without hitting the hard stop
@@ -46,6 +24,8 @@ long previousTime;
 // put function declarations here:
 void linearControl(int angleResolution,int startingAngle,int finalAngle,int timePerClock);
 void write(int servo_num, int angle);
+void quintic(int startingAngle, int finalAngle, int interpolation_time);
+void pid(int, int);
 
 void setup() {
   Serial.println("8 channel Servo test!");
@@ -72,7 +52,8 @@ void setup() {
 
   delay(10);
   Serial.begin(9600);
-
+  write(0, 0);
+  delay(200);
 }
 
 #define TIMEPERCLOCK 500
@@ -80,12 +61,15 @@ void setup() {
 #define STARTINGANGLE 0
 #define FINALANGLE 180
 
-void loop() {  
-  linearControl(ANGLERESOLUTION, STARTINGANGLE, FINALANGLE, TIMEPERCLOCK);
-  // write(0,0);
-  // delay(1000);
-  // write(0,180);
- 
+int loop_count = 0;
+
+void loop() {
+  delay(1000);
+  if (loop_count == 0)
+  {
+    loop_count++;
+    pid(0, 90);
+  }
 }
 
 // a = delta theta / time in seconds
@@ -106,22 +90,6 @@ void linearControl(int angleIncrimint, int startingAngle, int finalAngle, int ti
   // delay(1000);
 }
 
-void linearControl(int angleIncrimint, int startingAngle, int finalAngle, int timeIncrimint){
-
-  int goalTheta = startingAngle;
-  previousTime = millis();
-
-   while(goalTheta <= finalAngle){
-    if((((millis() - previousTime) >= timeIncrimint) ? previousTime = millis() : 0) ){ // if dt is correct
-      write(0, goalTheta);   
-      Serial.println(goalTheta);     
-      goalTheta += angleIncrimint;
-    } 
-    
-  }
-
-  // delay(1000);
-}
 
 void write(int servo_num, int angle) {
   
@@ -130,6 +98,39 @@ void write(int servo_num, int angle) {
   pwm.setPWM(servo_num, 0, pulse);
 }
 
+void quintic(int start_theta, int final_theta, int interpolation_time) {
+  
+}
+
+void pid(int start_theta, int final_theta) {
+
+  Serial.println("im here!!");
+  int error;
+  int current_angle = start_theta;
+  int error_dt;
+  int prev_error = 0;
+  float kp = 0.1;
+  float kd = 0;
+
+  long time_start = millis();
+
+  while(current_angle < final_theta) {
+    
+    if(millis() - time_start >= 100) {
+    error = final_theta - current_angle;
+    error_dt = error - prev_error;
+    prev_error = error;
+
+    float utility = kp * error + kd * error_dt;
+    Serial.println(utility);
+    write(0, utility);
+    current_angle = utility;
+    time_start = millis();
+    }
+    }
+
+    Serial.println("I am out of here");
+}
 
 // void loop() {
 //   // Drive each servo one at a time using setPWM()
