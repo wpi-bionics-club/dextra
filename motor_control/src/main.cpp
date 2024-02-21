@@ -2,6 +2,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <Adafruit_BusIO_Register.h>
 #include <Wire.h>
+#include <math.h>
 
 
 // called this way, it uses the default address 0x40
@@ -103,34 +104,47 @@ void quintic(int start_theta, int final_theta, int interpolation_time) {
 }
 
 void pid(int start_theta, int final_theta) {
-
-  Serial.println("im here!!");
-  int error;
-  int current_angle = start_theta;
-  int error_dt;
-  int prev_error = 0;
-  float kp = 0.1;
+  Serial.println("I'm here!!");
+  float error = -1;
+  float current_angle = start_theta;
+  float error_dt = -1;
+  float prev_error = 0;
+  float error_sum = 0;
+  float kp = 0.4;
+  float ki = 0.1;
   float kd = 0;
 
   long time_start = millis();
 
-  while(current_angle < final_theta) {
-    
-    if(millis() - time_start >= 100) {
+  while (current_angle < final_theta) {
     error = final_theta - current_angle;
-    error_dt = error - prev_error;
-    prev_error = error;
 
-    float utility = kp * error + kd * error_dt;
-    Serial.println(utility);
-    write(0, utility);
-    current_angle = utility;
-    time_start = millis();
-    }
-    }
+    if (millis() - time_start >= 100) {
+      Serial.print("Error is: ");
+      Serial.println(error);
 
-    Serial.println("I am out of here");
+      error_dt = error - prev_error;
+      prev_error = error;
+
+      if(abs(error) < 1) {
+        error_sum += error;
+      }
+
+      float utility = kp * error + ki * error_sum;  // angle we want to increment by
+      Serial.print("Control signal is: ");
+      Serial.println(utility);
+
+      current_angle += utility;
+
+      // Move the motor
+      write(0, current_angle);  // Assuming this function sends step commands to the motor
+      time_start = millis();
+    }
+  }
+
+  Serial.println("I'm out of here");
 }
+
 
 // void loop() {
 //   // Drive each servo one at a time using setPWM()
